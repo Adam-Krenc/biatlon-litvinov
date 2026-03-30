@@ -26,7 +26,8 @@ export default function LoginPage() {
       setError("Nesprávný email nebo heslo.");
       setLoading(false);
     } else {
-      router.push("/admin");
+      // Plný reload zajistí správné nastavení session cookie
+      window.location.href = "/admin";
     }
   }
 

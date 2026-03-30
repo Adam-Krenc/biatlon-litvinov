@@ -3,9 +3,19 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function proxy(request: NextRequest) {
+  // NextAuth v5 na HTTPS (produkce) používá __Secure-authjs.session-token
+  const secureCookie = request.nextUrl.protocol === "https:";
+
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
+    secureCookie,
+    cookieName: secureCookie
+      ? "__Secure-authjs.session-token"
+      : "authjs.session-token",
+    salt: secureCookie
+      ? "__Secure-authjs.session-token"
+      : "authjs.session-token",
   });
 
   const { pathname } = request.nextUrl;
