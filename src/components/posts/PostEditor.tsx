@@ -5,7 +5,7 @@ import StarterKit from "@tiptap/starter-kit";
 import LinkExt from "@tiptap/extension-link";
 import ImageExt from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useState } from "react";
 
 interface PostEditorProps {
   content: string;
@@ -14,6 +14,8 @@ interface PostEditorProps {
 
 export default function PostEditor({ content, onChange }: PostEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   const editor = useEditor({
     extensions: [
@@ -33,12 +35,21 @@ export default function PostEditor({ content, onChange }: PostEditorProps) {
   });
 
   const uploadImage = useCallback(async (file: File) => {
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: fd });
-    const data = await res.json();
-    if (data.url && editor) {
-      editor.chain().focus().setImage({ src: data.url }).run();
+    setUploading(true);
+    setUploadError("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Upload selhal");
+      if (data.url && editor) {
+        editor.chain().focus().setImage({ src: data.url }).run();
+      }
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Upload selhal");
+    } finally {
+      setUploading(false);
     }
   }, [editor]);
 
@@ -93,25 +104,23 @@ export default function PostEditor({ content, onChange }: PostEditorProps) {
         <span className="w-px bg-gray-300 mx-1" />
 
         {/* Upload fotky */}
-        <button
-          type="button"
+        <label
           title="Vložit fotku"
-          onClick={() => fileInputRef.current?.click()}
-          className="px-2 py-1 text-sm rounded border bg-white text-gray-700 border-gray-300 hover:bg-gray-100 transition-colors"
+          className={`px-2 py-1 text-sm rounded border bg-white text-gray-700 border-gray-300 hover:bg-gray-100 transition-colors cursor-pointer select-none ${uploading ? "opacity-50 pointer-events-none" : ""}`}
         >
-          📷 Fotka
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) uploadImage(file);
-            e.target.value = "";
-          }}
-        />
+          {uploading ? "⏳ Nahrávám..." : "📷 Fotka"}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) uploadImage(file);
+              e.target.value = "";
+            }}
+          />
+        </label>
 
         {/* Plovoucí obrázek vedle textu */}
         <button
@@ -154,6 +163,11 @@ export default function PostEditor({ content, onChange }: PostEditorProps) {
         </button>
       </div>
 
+      {uploadError && (
+        <p className="text-red-600 text-xs px-3 py-1 bg-red-50 border-b border-red-200">
+          ⚠️ {uploadError}
+        </p>
+      )}
       <EditorContent editor={editor} />
     </div>
   );
