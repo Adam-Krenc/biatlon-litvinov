@@ -3,8 +3,8 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import LinkExt from "@tiptap/extension-link";
-import ImageExt from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
+import { ResizableImage } from "@/lib/tiptap/ResizableImage";
 import { useRef, useCallback, useState } from "react";
 
 interface PostEditorProps {
@@ -21,7 +21,7 @@ export default function PostEditor({ content, onChange }: PostEditorProps) {
     extensions: [
       StarterKit,
       LinkExt.configure({ openOnClick: false }),
-      ImageExt.configure({ inline: true, allowBase64: false }),
+      ResizableImage,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
     content,
@@ -176,26 +176,7 @@ export default function PostEditor({ content, onChange }: PostEditorProps) {
           ◨ Vpravo
         </button>
         <span className="w-px bg-gray-300 mx-1" />
-
-        {/* Velikost obrázku */}
-        {(["25%", "50%", "75%", "100%"] as const).map((w) => (
-          <button
-            key={w}
-            type="button"
-            title={`Šířka ${w}`}
-            onClick={() => {
-              const { state } = editor;
-              const node = state.doc.nodeAt(state.selection.from);
-              if (node?.type.name === "image") {
-                const base = (node.attrs.style || "").replace(/width:\s*[\d.]+%;\s*/g, "");
-                editor.chain().focus().updateAttributes("image", { style: `width: ${w}; ${base}`.trim() }).run();
-              }
-            }}
-            className="px-2 py-1 text-sm rounded border bg-white text-gray-700 border-gray-300 hover:bg-gray-100 transition-colors"
-          >
-            {w}
-          </button>
-        ))}
+        <span className="px-2 py-1 text-xs text-gray-400 select-none">Klikni na fotku → táhni roh pro změnu velikosti</span>
       </div>
 
       {uploadError && (
