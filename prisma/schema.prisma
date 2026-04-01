@@ -66,6 +66,18 @@ model Gallery {
   @@map("galleries")
 }
 
+model Sponsor {
+  id        String   @id @default(cuid())
+  name      String
+  website   String?
+  logoUrl   String
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("sponsors")
+}
+
 model Photo {
   id           String   @id @default(cuid())
   cloudinaryId String

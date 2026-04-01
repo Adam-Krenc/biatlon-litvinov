@@ -110,6 +110,50 @@ async function main() {
     },
   });
   console.log("✅ Ukázkový příspěvek vytvořen");
+
+  // Sponsors from biatlonlitvinov.cz
+  const sponsors = [
+    {
+      name: "Luftuj s.r.o.",
+      website: "https://www.luftuj.cz/",
+      logoUrl: "http://biatlonlitvinov.cz/wp-content/uploads/2023/12/mcm_logo_luftuj_cz_2023-700x222.jpg",
+      order: 1,
+    },
+    {
+      name: "Ústecký kraj",
+      website: "https://www.kr-ustecky.cz/",
+      logoUrl: "http://biatlonlitvinov.cz/wp-content/uploads/2021/06/%C3%BAsteck%C3%BD-kraj-294x300.png",
+      order: 2,
+    },
+    {
+      name: "SSK Litvínov",
+      website: "https://www.ssk-litvinov.cz/",
+      logoUrl: "http://biatlonlitvinov.cz/wp-content/uploads/2021/06/logo-SSK-225x300.jpg",
+      order: 3,
+    },
+    {
+      name: "Národní sportovní agentura",
+      website: "https://agenturasport.cz/",
+      logoUrl: "http://biatlonlitvinov.cz/wp-content/uploads/2022/02/nsa.png",
+      order: 4,
+    },
+    {
+      name: "Archa interiér",
+      website: "http://www.archainterier.cz/",
+      logoUrl: "http://biatlonlitvinov.cz/wp-content/uploads/2021/06/archa-i.jpg",
+      order: 5,
+    },
+  ];
+
+  for (const sponsor of sponsors) {
+    const existing = await prisma.sponsor.findFirst({ where: { name: sponsor.name } });
+    if (!existing) {
+      await prisma.sponsor.create({ data: sponsor });
+      console.log(`✅ Sponzor "${sponsor.name}" vytvořen`);
+    } else {
+      console.log(`⏭ Sponzor "${sponsor.name}" již existuje`);
+    }
+  }
 }
 
 main()

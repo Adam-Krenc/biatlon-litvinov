@@ -14,6 +14,7 @@ const links = [
   { href: "/admin/stranky", label: "Stránky", icon: "📄", adminOnly: true },
   { href: "/admin/galerie", label: "Galerie", icon: "🖼", adminOnly: true },
   { href: "/admin/uzivatele", label: "Uživatelé", icon: "👥", adminOnly: true },
+  { href: "/admin/sponzori", label: "Sponzoři", icon: "🤝", adminOnly: true },
   { href: "/admin/nastaveni", label: "Nastavení", icon: "⚙" },
 ];
 

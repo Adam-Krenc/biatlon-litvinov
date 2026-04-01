@@ -8,6 +8,19 @@ cloudinary.config({
 
 export { cloudinary };
 
+export async function uploadToCloudinary(
+  dataUri: string,
+  folder = "biatlon"
+): Promise<{ secure_url: string; public_id: string; width: number; height: number }> {
+  const result = await cloudinary.uploader.upload(dataUri, { folder });
+  return {
+    secure_url: result.secure_url,
+    public_id: result.public_id,
+    width: result.width,
+    height: result.height,
+  };
+}
+
 export function getThumbnailUrl(url: string, width = 400): string {
   // Transform Cloudinary URL to generate a thumbnail
   return url.replace("/upload/", `/upload/w_${width},c_fill,q_auto,f_auto/`);
