@@ -29,7 +29,7 @@ export default function PostEditor({ content, onChange }: PostEditorProps) {
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
-        class: "prose max-w-none focus:outline-none min-h-[300px] p-3",
+        class: "prose max-w-none focus:outline-none min-h-[500px] p-3",
       },
     },
   });
@@ -175,6 +175,27 @@ export default function PostEditor({ content, onChange }: PostEditorProps) {
         >
           ◨ Vpravo
         </button>
+        <span className="w-px bg-gray-300 mx-1" />
+
+        {/* Velikost obrázku */}
+        {(["25%", "50%", "75%", "100%"] as const).map((w) => (
+          <button
+            key={w}
+            type="button"
+            title={`Šířka ${w}`}
+            onClick={() => {
+              const { state } = editor;
+              const node = state.doc.nodeAt(state.selection.from);
+              if (node?.type.name === "image") {
+                const base = (node.attrs.style || "").replace(/width:\s*[\d.]+%;\s*/g, "");
+                editor.chain().focus().updateAttributes("image", { style: `width: ${w}; ${base}`.trim() }).run();
+              }
+            }}
+            className="px-2 py-1 text-sm rounded border bg-white text-gray-700 border-gray-300 hover:bg-gray-100 transition-colors"
+          >
+            {w}
+          </button>
+        ))}
       </div>
 
       {uploadError && (
