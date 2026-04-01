@@ -88,11 +88,7 @@ function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps)
   );
 }
 
-export const ResizableImage = Image.extend({
-  addOptions() {
-    return { ...this.parent?.(), inline: true, allowBase64: false };
-  },
-
+export const ResizableImage = Image.configure({ inline: true, allowBase64: false }).extend({
   addAttributes() {
     return {
       ...this.parent?.(),
