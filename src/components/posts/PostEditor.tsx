@@ -38,13 +38,27 @@ export default function PostEditor({ content, onChange }: PostEditorProps) {
     setUploading(true);
     setUploadError("");
     try {
+      // Get signed upload params from server
+      const sigRes = await fetch("/api/upload-signature");
+      if (!sigRes.ok) throw new Error("Nepřihlášen");
+      const { signature, timestamp, apiKey, cloudName, folder } = await sigRes.json();
+
+      // Upload directly to Cloudinary (bypasses Vercel 4.5 MB limit)
       const fd = new FormData();
       fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Upload selhal");
-      if (data.url && editor) {
-        editor.chain().focus().setImage({ src: data.url }).run();
+      fd.append("api_key", apiKey);
+      fd.append("timestamp", String(timestamp));
+      fd.append("signature", signature);
+      fd.append("folder", folder);
+
+      const uploadRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        { method: "POST", body: fd }
+      );
+      const data = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error(data.error?.message ?? "Upload selhal");
+      if (data.secure_url && editor) {
+        editor.chain().focus().setImage({ src: data.secure_url }).run();
       }
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : "Upload selhal");
