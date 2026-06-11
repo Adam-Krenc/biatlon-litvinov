@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useSession, signOut } from "next-auth/react";
 
 const navLinks = [
   { href: "/", label: "Aktuality" },
@@ -18,6 +19,7 @@ const navLinks = [
 export default function Navigation() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { data: session } = useSession();
 
   return (
     <nav>
@@ -100,6 +102,38 @@ export default function Navigation() {
                 </li>
               );
             })}
+
+            {/* Auth odkazy pro mobil */}
+            <li className="border-t border-white/15 mt-2 pt-2">
+              {session ? (
+                <>
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileOpen(false)}
+                    className="block px-6 py-3 text-sm font-medium text-[#e8c547] hover:bg-white/10 transition-colors"
+                  >
+                    Admin
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMobileOpen(false);
+                      signOut({ callbackUrl: "/" });
+                    }}
+                    className="block w-full text-left px-6 py-3 text-sm font-medium text-white/80 hover:bg-white/10 transition-colors"
+                  >
+                    Odhlásit
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/prihlaseni"
+                  onClick={() => setMobileOpen(false)}
+                  className="block px-6 py-3 text-sm font-semibold text-[#e8c547] hover:bg-white/10 transition-colors"
+                >
+                  Přihlásit
+                </Link>
+              )}
+            </li>
           </ul>
         </div>
       )}

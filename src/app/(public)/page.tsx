@@ -14,29 +14,23 @@ export default async function HomePage({ searchParams }: Props) {
   const { q } = await searchParams;
   const session = await auth();
 
-  const [posts, sponsors] = await Promise.all([
-    prisma.post.findMany({
-      where: {
-        published: true,
-        ...(q
-          ? {
-              OR: [
-                { title: { contains: q, mode: "insensitive" } },
-                { content: { contains: q, mode: "insensitive" } },
-                { excerpt: { contains: q, mode: "insensitive" } },
-              ],
-            }
-          : {}),
-      },
-      orderBy: { createdAt: "desc" },
-      take: 24,
-      include: { author: { select: { name: true } } },
-    }),
-    prisma.sponsor.findMany({
-      where: { active: true },
-      orderBy: { order: "asc" },
-    }),
-  ]);
+  const posts = await prisma.post.findMany({
+    where: {
+      published: true,
+      ...(q
+        ? {
+            OR: [
+              { title: { contains: q, mode: "insensitive" } },
+              { content: { contains: q, mode: "insensitive" } },
+              { excerpt: { contains: q, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
+    orderBy: { createdAt: "desc" },
+    take: 24,
+    include: { author: { select: { name: true } } },
+  });
 
   return (
     <div>
@@ -50,39 +44,15 @@ export default async function HomePage({ searchParams }: Props) {
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1a3a6b]/60 to-transparent" />
-        <div className="absolute bottom-6 left-6">
+        <div className="absolute bottom-6 left-6 right-6">
           <h1 className="text-white text-2xl md:text-3xl font-bold drop-shadow">
             Klub biatlonu Litvínov
           </h1>
+          <p className="text-white/90 text-sm md:text-base mt-1 drop-shadow max-w-xl">
+            Běh, střelba a parta. Trénujeme děti i dospělé v Litvínově a okolí.
+          </p>
         </div>
       </div>
-
-      {/* Sponzoři */}
-      {sponsors.length > 0 && (
-        <div className="bg-white border-b border-gray-200 py-4 px-4">
-          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-center gap-6">
-            <span className="text-xs text-gray-400 uppercase tracking-wider shrink-0">
-              Partneři
-            </span>
-            {sponsors.map((s) => (
-              <a
-                key={s.id}
-                href={s.website ?? "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={s.name}
-                className="opacity-70 hover:opacity-100 transition-opacity"
-              >
-                <img
-                  src={s.logoUrl}
-                  alt={s.name}
-                  className="h-10 max-w-[120px] object-contain"
-                />
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Příspěvky */}
       <div className="max-w-7xl mx-auto px-4 py-8">

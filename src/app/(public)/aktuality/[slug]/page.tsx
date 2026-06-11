@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { formatDate } from "@/lib/utils";
+import { formatDate, truncate } from "@/lib/utils";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { canEditPost } from "@/lib/permissions";
+import type { Metadata } from "next";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -15,6 +16,26 @@ export async function generateStaticParams() {
     select: { slug: true },
   });
   return posts.map((p: { slug: string }) => ({ slug: p.slug }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await prisma.post.findUnique({ where: { slug } });
+  if (!post || !post.published) return {};
+
+  const description = post.excerpt || truncate(post.content, 160);
+
+  return {
+    title: post.title,
+    description,
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description,
+      publishedTime: post.createdAt.toISOString(),
+      images: post.coverImage ? [post.coverImage] : undefined,
+    },
+  };
 }
 
 export default async function PostPage({ params }: Props) {
